@@ -162,7 +162,7 @@ def tiltCamera_handler():
             pwmTilt.ChangeDutyCycle(cameraYcurrent)
             time.sleep(0.01)
 
-def takePicture():
+def takePicture(i):
     cap = cv2.VideoCapture(0)
     success, image = cap.read()
     if success:
