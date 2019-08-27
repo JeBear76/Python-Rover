@@ -204,15 +204,16 @@ def gamepad_handler():
                 break
     print ("GamePad Controller stopped")
 
-camRotateThread = threading.Thread(target=rotateCamera_handler)
-camTiltThread = threading.Thread(target=tiltCamera_handler)
-motorThread = threading.Thread(target=motorDirection_handler)
+def StartThisThing():
+    camRotateThread = threading.Thread(target=rotateCamera_handler)
+    camTiltThread = threading.Thread(target=tiltCamera_handler)
+    motorThread = threading.Thread(target=motorDirection_handler)
 
-t = threading.Thread(target=gamepad_handler)
+    t = threading.Thread(target=gamepad_handler)
 
-print ("starting GamePad Controller")
-camRotateThread.start()
-camTiltThread.start()
-motorThread.start()
-t.start()
+    print ("starting GamePad Controller")
+    camRotateThread.start()
+    camTiltThread.start()
+    motorThread.start()
+    t.start()
 

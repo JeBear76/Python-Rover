@@ -9,7 +9,7 @@ from flask import Flask, Response, render_template
 app = Flask(__name__)
 import videostream as vs
 import os
-
+import robot_controller as robot
 
 
 def gen(camera):
@@ -32,4 +32,5 @@ def static_images():
     return render_template('gallery.html', files = lst)
     
 if __name__ == '__main__':
+    robot.StartThisThing()
     app.run(host='0.0.0.0', port=3000)
