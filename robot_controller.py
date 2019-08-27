@@ -167,7 +167,7 @@ class Robot_Controller(object):
             "ABS_Y": self.setMotorYDirection,
             "BTN_SOUTH": self.takePicture
         }
-        func = self.control_switcher.get(command, lambda x: dummy())
+        func = self.control_switcher.get(command, lambda x: self.dummy())
     
         func(value)
     
