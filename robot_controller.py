@@ -35,18 +35,18 @@ class Robot_Controller(object):
         self.GPIO.setmode(GPIO.BOARD)
         
         #Motor A
-        self.GPIO.setup(self.ENA, GPIO.OUT)
-        self.GPIO.setup(self.IN1, GPIO.OUT)
-        self.GPIO.setup(self.IN2, GPIO.OUT)
+        GPIO.setup(self.ENA, GPIO.OUT)
+        GPIO.setup(self.IN1, GPIO.OUT)
+        GPIO.setup(self.IN2, GPIO.OUT)
         
-        self.GPIO.setup(self.ENB, GPIO.OUT)
-        self.GPIO.setup(self.IN3, GPIO.OUT)
-        self.GPIO.setup(self.IN4, GPIO.OUT)
+        GPIO.setup(self.ENB, GPIO.OUT)
+        GPIO.setup(self.IN3, GPIO.OUT)
+        GPIO.setup(self.IN4, GPIO.OUT)
         
         #Camera Servo Rotation
-        self.GPIO.setup(self.servoH, GPIO.OUT)
+        GPIO.setup(self.servoH, GPIO.OUT)
         #Camera Servo Tilt
-        self.GPIO.setup(self.servoV, GPIO.OUT)
+        GPIO.setup(self.servoV, GPIO.OUT)
         
         self.pwmRotation = GPIO.PWM(self.servoH, 50)
         self.pwmTilt = GPIO.PWM(self.servoV, 50)
