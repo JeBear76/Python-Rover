@@ -2,7 +2,8 @@ from inputs import devices, get_gamepad
 import threading
 import RPi.GPIO as GPIO
 import time
-#import numpy as np
+import datetime
+import cv2
 
 threadActive = True
 rotateOn = False
@@ -63,6 +64,8 @@ def dummy():
 
 def setMotorXDirection(x):
     global currentMotorX
+    if x < 25000 and x > -25000:
+        currentMotorX = 0
     if(x == -32768):
         x = -32767
     currentMotorX = x/32767
@@ -125,8 +128,8 @@ def motorDirection_handler():
             rightMotorSpeed = abs(currentMotorY)
             leftMotorSpeed = abs(currentMotorY)
 
-        pwmLeftMotor.ChangeDutyCycle(leftMotorSpeed * 10)
-        pwmRightMotor.ChangeDutyCycle(rightMotorSpeed * 10)
+        pwmLeftMotor.ChangeDutyCycle(leftMotorSpeed * 30)
+        pwmRightMotor.ChangeDutyCycle(rightMotorSpeed * 30)
 
 def rotateCamera_handler():
     global threadActive
@@ -160,6 +163,14 @@ def tiltCamera_handler():
             time.sleep(0.01)
 
 def takePicture():
+    cap = cv2.VideoCapture(0)
+    success, image = cap.read()
+    if success:
+        text = "Greetings from..."
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        image = cv2.putText(image, text, (10, 50), font, 0.75, (255, 0, 255), 2, cv2.LINE_AA)
+        cv2.imwrite('static/' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.png', image)
+    cap.release()
     return
 
 def sendCommand(command, value):
