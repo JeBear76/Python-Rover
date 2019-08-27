@@ -25,8 +25,8 @@ currentMotorY = 0
 
 ENA = 31
 ENB = 37
-IN1 = 32
-IN2 = 33
+IN1 = 33
+IN2 = 32
 IN3 = 38
 IN4 = 40
 
@@ -52,10 +52,10 @@ pwmTilt = GPIO.PWM(15, 50)
 pwmRotation.start(cameraXcurrent)
 pwmTilt.start(cameraYcurrent)
 
-pwmLeftMotor = GPIO.PWM(ENA, 100)
-pwmLeftMotor.start(0)
-pwmRightMotor = GPIO.PWM(ENB, 100)
+pwmRightMotor = GPIO.PWM(ENA, 100)
 pwmRightMotor.start(0)
+pwmLeftMotor = GPIO.PWM(ENB, 100)
+pwmLeftMotor.start(0)
 
 def dummy():
 #    print ("in dummy function")
@@ -79,9 +79,6 @@ def setRotateCameraX(direction):
     global rotateOn
     if(direction == -32768):
         direction = -32767
-    if(direction <= 5 or direction >= -5):
-        rotateOn = False
-        return
     cameraXdelta = -direction/327670
     rotateOn = True
 
@@ -90,9 +87,6 @@ def setRotateCameraY(direction):
     global tiltOn
     if(direction == -32768):
         direction = -32767
-    if(direction <= 5 or direction >= -5):
-        tiltOn = False
-        return
     cameraYdelta = direction/327670
     tiltOn = True
 
@@ -111,28 +105,28 @@ def motorDirection_handler():
 
         if(currentMotorX > 0):
             if (currentMotorY >= 0):
-                rightMotorSpeed = abs(currentMotorY)
+                rightMotorSpeed = 0
                 leftMotorSpeed = abs(currentMotorX)
 
             if (currentMotorY < 0):
                 rightMotorSpeed = abs(currentMotorX)
-                leftMotorSpeed = abs(currentMotorY)
-
+                leftMotorSpeed = 0
+                
         if(currentMotorX < 0):
             if(currentMotorY >= 0):
                 rightMotorSpeed = abs(currentMotorX)
-                leftMotorSpeed = abs(currentMotorY)
+                leftMotorSpeed = 0
 
             if(currentMotorY < 0):
-                rightMotorSpeed = abs(currentMotorY)
+                rightMotorSpeed = 0
                 leftMotorSpeed = abs(currentMotorX)
 
         if(currentMotorX == 0):
             rightMotorSpeed = abs(currentMotorY)
             leftMotorSpeed = abs(currentMotorY)
 
-        pwmLeftMotor.ChangeDutyCycle(leftMotorSpeed * 100)
-        pwmRightMotor.ChangeDutyCycle(rightMotorSpeed * 100)
+        pwmLeftMotor.ChangeDutyCycle(leftMotorSpeed * 10)
+        pwmRightMotor.ChangeDutyCycle(rightMotorSpeed * 10)
 
 def rotateCamera_handler():
     global threadActive
