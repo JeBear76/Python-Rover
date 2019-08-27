@@ -32,7 +32,7 @@ class Robot_Controller(object):
         self.servoH = 13
         self.servoV = 15
         
-        self.GPIO.setmode(GPIO.BOARD)
+        GPIO.setmode(GPIO.BOARD)
         
         #Motor A
         GPIO.setup(self.ENA, GPIO.OUT)
