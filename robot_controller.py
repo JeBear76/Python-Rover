@@ -87,7 +87,7 @@ class Robot_Controller(object):
     def setRotateCameraY(self, direction):
         if(direction == -32768):
             direction = -32767
-        self.cameraYdelta = direction/327670
+        self.cameraYdelta = -direction/327670
         self.tiltOn = True
 
     def setDirection(self, in1,in2,in3,in4):
