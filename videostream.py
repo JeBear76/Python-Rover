@@ -9,22 +9,13 @@ import datetime
 
 class VideoStream(object):
     def __init__(self):
-        # Using OpenCV to capture from device 0. If you have trouble capturing
-        # from a webcam, comment the line below out and use a video file
-        # instead.
         self.video = cv2.VideoCapture(0)
-        # If you decide to use video.mp4, you must have this file in the folder
-        # as the main.py.
-        # self.video = cv2.VideoCapture('video.mp4')
 
     def __del__(self):
         self.video.release()
 
     def get_frame(self):
         _, image = self.video.read()
-        # We are using Motion JPEG, but OpenCV defaults to capture raw images,
-        # so we must encode it into JPEG in order to correctly display the
-        # video stream.
 
         font = cv2.FONT_HERSHEY_SIMPLEX
         text = "Rover - " +  datetime.datetime.now().strftime("%a %d %m %Y %X")
@@ -32,3 +23,13 @@ class VideoStream(object):
 
         ret, jpeg = cv2.imencode('.png', image)
         return jpeg.tobytes()
+    
+    def save_image(self):
+        success, image = self.video.read()
+        if success:
+            text = "Greetings from..."
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            image = cv2.putText(image, text, (10, 50), font, 0.75, (255, 0, 255), 2, cv2.LINE_AA)
+            cv2.imwrite('static/' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.png', image)
+
+        

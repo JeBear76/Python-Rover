@@ -9,8 +9,9 @@ from flask import Flask, Response, render_template
 app = Flask(__name__)
 import videostream as vs
 import os
-import robot_controller as robot
+import robot_controller as rbc
 
+appCamera = None
 
 def gen(camera):
     while True:
@@ -20,8 +21,9 @@ def gen(camera):
 
 @app.route('/video_feed')
 def video_feed():
-    return Response(gen(vs.VideoStream()),
+    return Response(gen(appCamera),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
+    
 @app.route('/gallery')
 def static_images():
     try:
@@ -32,5 +34,7 @@ def static_images():
     return render_template('gallery.html', files = lst)
     
 if __name__ == '__main__':
+    appCamera = vs.VideoStream()
+    robot = rbc.Robot_Controller(appCamera)
     robot.StartThisThing()
     app.run(host='0.0.0.0', port=3000)
