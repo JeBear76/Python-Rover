@@ -12,27 +12,28 @@ import os
 import robot_controller as rbc
 
 appCamera = None
+robot = None
 
 def gen(camera):
     while True:
         frame = camera.get_frame()
         yield (b'--frame\r\n'
-               b'Content-Type: image/png\r\n\r\n' + frame + b'\r\n\r\n')
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
 @app.route('/video_feed')
 def video_feed():
     return Response(gen(appCamera),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
-    
+
 @app.route('/gallery')
 def static_images():
     try:
         lst = os.listdir('static/')
     except OSError:
         pass
-        
+
     return render_template('gallery.html', files = lst)
-    
+
 if __name__ == '__main__':
     appCamera = vs.VideoStream()
     robot = rbc.Robot_Controller(appCamera)

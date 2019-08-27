@@ -20,10 +20,9 @@ class VideoStream(object):
         font = cv2.FONT_HERSHEY_SIMPLEX
         text = "Rover - " +  datetime.datetime.now().strftime("%a %d %m %Y %X")
         image = cv2.putText(image, text, (10, 50), font, 0.75, (255, 0, 255), 2, cv2.LINE_AA)
-
-        ret, jpeg = cv2.imencode('.png', image)
+        _, jpeg = cv2.imencode('.jpg', image)
         return jpeg.tobytes()
-    
+
     def save_image(self):
         success, image = self.video.read()
         if success:
@@ -32,4 +31,3 @@ class VideoStream(object):
             image = cv2.putText(image, text, (10, 50), font, 0.75, (255, 0, 255), 2, cv2.LINE_AA)
             cv2.imwrite('static/' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.png', image)
 
-        
