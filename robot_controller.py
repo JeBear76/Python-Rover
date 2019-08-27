@@ -164,6 +164,7 @@ def tiltCamera_handler():
 
 def takePicture(i):
     cap = cv2.VideoCapture(0)
+    print(cap.isOpened())
     success, image = cap.read()
     if success:
         text = "Greetings from..."
