@@ -102,15 +102,15 @@ class Robot_Controller(object):
             if (self.currentMotorY >= 0):
                 self.setDirection(True,False,True,False)
                 if(self.currentMotorX > 0):
-                    self.rightMotorSpeed -= abs(self.currentMotorX)
+                    self.leftMotorSpeed += abs(self.currentMotorX)/2
                 if(self.currentMotorX < 0):
-                    self.leftMotorSpeed -= abs(self.currentMotorX)
+                    self.rightMotorSpeed += abs(self.currentMotorX)/2
             if (self.currentMotorY < 0):
                 self.setDirection(False,True,False,True)
                 if(self.currentMotorX > 0):
-                    self.leftMotorSpeed -= abs(self.currentMotorX)
+                    self.rightMotorSpeed += abs(self.currentMotorX)/2
                 if(self.currentMotorX < 0):
-                    self.rightMotorSpeed -= abs(self.currentMotorX)
+                    self.leftMotorSpeed += abs(self.currentMotorX)/2
 
             self.pwmLeftMotor.ChangeDutyCycle(self.leftMotorSpeed * 50)
             self.pwmRightMotor.ChangeDutyCycle(self.rightMotorSpeed * 50)
