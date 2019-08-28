@@ -11,21 +11,6 @@ import os
 import robot_controller as rbc
 import threading
 import time
-from werkzeug.serving import make_server
-
-class ServerThread(threading.Thread):
-    def __init__(self, app):
-        threading.Thread.__init__(self)
-        self.srv = make_server('0.0.0.0', 3000, app)
-        self.ctx = app.app_context()
-        self.ctx.push()
-
-    def run(self):
-        print('starting server')
-        self.srv.serve_forever()
-
-    def shutdown(self):
-        self.srv.shutdown()
         
 app = Flask(__name__)
 
@@ -37,7 +22,6 @@ def gen(camera):
 
 @app.route('/video_feed')
 def video_feed():
-    global appCamera
     return Response(gen(appCamera),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
@@ -52,24 +36,23 @@ def static_images():
 
 @app.route('/shutdown')
 def shutdown():
-    global server
     global appCamera
     global robot
     robot.threadActive = False
     time.sleep(1)
     print('controls shutdown')
-    server.shutdown()
-    print('server shutdown')
+    raise RuntimeError('server shutdown')
 
 if __name__ == '__main__':
-    global server
     global appCamera
     global robot
     appCamera = vs.VideoStream()
-    server = ServerThread(app)
-    server.start()
-    print('server started')
     robot = rbc.Robot_Controller(appCamera)
     robot.StartThisThing()
-    print('controls started')
+    try:
+        app.run(host='0.0.0.0', port=3000)
+    except:
+        pass
+    
+    
     
