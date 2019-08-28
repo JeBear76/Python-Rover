@@ -38,9 +38,7 @@ def static_images():
 def shutdown():
     global appCamera
     global robot
-    robot.threadActive = False
-    time.sleep(1)
-    print('controls shutdown')
+    robot.StopControls()
     func = request.environ.get('werkzeug.server.shutdown')
     if func is None:
         raise RuntimeError('Not running with the Werkzeug Server')
