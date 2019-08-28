@@ -185,7 +185,7 @@ class Robot_Controller(object):
 
         self.gamePadThread = threading.Thread(target=self.gamepad_handler)
 
-        print ("starting GamePad Controller")
+        print ("GamePad Controller starting")
         self.camRotateThread.start()
         self.camTiltThread.start()
         self.motorThread.start()
