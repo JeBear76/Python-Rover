@@ -10,6 +10,8 @@ app = Flask(__name__)
 import videostream as vs
 import os
 import robot_controller as rbc
+import time
+from sys import exit
 
 appCamera = None
 robot = None
@@ -33,6 +35,12 @@ def static_images():
         pass
 
     return render_template('gallery.html', files = lst)
+
+@app.route('/shutdown')
+def shutdown():
+    robot.threadActive = False
+    time.sleep(1)
+    exit(0)
 
 if __name__ == '__main__':
     appCamera = vs.VideoStream()

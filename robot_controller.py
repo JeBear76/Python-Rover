@@ -158,17 +158,24 @@ class Robot_Controller(object):
 
     def gamepad_handler(self):
         while self.threadActive:
-            events = get_gamepad()
-            for event in events:
-                try:
-                    if(event.code == "BTN_START" and event.state == 1):
+            try:
+                events = get_gamepad()
+            except:
+                print('No Controller found.')
+                print('Controls shutdown.')
+                self.threadActive = False
+            else:
+                for event in events:
+                    try:
+                        if(event.code == "BTN_START" and event.state == 1):
+                            self.threadActive = False
+                            break
+                        self.sendCommand(event.code, event.state)
+                    except Exception as err:
+                        print(format(err))
                         self.threadActive = False
+                        print('Controls shutdown.')
                         break
-                    self.sendCommand(event.code, event.state)
-                except Exception as err:
-                    print(format(err))
-                    self.threadActive = False
-                    break
         print ("GamePad Controller stopped")
 
     def StartThisThing(self):
