@@ -10,11 +10,10 @@ class Robot_Controller(object):
         self.rotateOn = False
         self.tiltOn = False
 
-        self.cameraXcurrent = 5
+
         self.cameraXdelta = 0
         self.cameraXmin = 1
         self.cameraXmax = 9
-        self.cameraYcurrent = 4.5
         self.cameraYdelta = 0
         self.cameraYmin = 1.5
         self.cameraYmax = 7.5
@@ -38,7 +37,7 @@ class Robot_Controller(object):
         GPIO.setup(self.ENA, GPIO.OUT)
         GPIO.setup(self.IN1, GPIO.OUT)
         GPIO.setup(self.IN2, GPIO.OUT)
-	#Motor B
+	    #Motor B
         GPIO.setup(self.ENB, GPIO.OUT)
         GPIO.setup(self.IN3, GPIO.OUT)
         GPIO.setup(self.IN4, GPIO.OUT)
@@ -51,8 +50,7 @@ class Robot_Controller(object):
         self.pwmRotation = GPIO.PWM(self.servoH, 50)
         self.pwmTilt = GPIO.PWM(self.servoV, 50)
 
-        self.pwmRotation.start(self.cameraXcurrent)
-        self.pwmTilt.start(self.cameraYcurrent)
+        self.resetCameraPosition(0)
 
         self.pwmRightMotor = GPIO.PWM(self.ENA, 100)
         self.pwmRightMotor.start(0)
@@ -61,10 +59,6 @@ class Robot_Controller(object):
 
     def __del__(self):
         self.threadActive = False
-
-    def dummy():
-    #    print ("in dummy function")
-        return
 
     def setMotorXDirection(self, x):
         if(x == -32768):
@@ -88,6 +82,12 @@ class Robot_Controller(object):
         self.cameraYdelta = -direction/327670
         self.tiltOn = True
 
+    def resetCameraPosition(self, i):
+        self.cameraXcurrent = 5
+        self.cameraYcurrent = 4.5
+        self.pwmRotation.start(self.cameraXcurrent)
+        self.pwmTilt.start(self.cameraYcurrent)
+        
     def setDirection(self, in1,in2,in3,in4):
         GPIO.output(self.IN1, in1)
         GPIO.output(self.IN2, in2)
@@ -144,13 +144,14 @@ class Robot_Controller(object):
         return
 
     def sendCommand(self, command, value):
-        print (command, value)
+        #print (command, value)
         self.control_switcher = {
             "ABS_RX": self.setRotateCameraX,
             "ABS_RY": self.setRotateCameraY,
             "ABS_X": self.setMotorXDirection,
             "ABS_Y": self.setMotorYDirection,
-            "BTN_SOUTH": self.takePicture
+            "BTN_SOUTH": self.takePicture,
+            "BTN_EAST": self.resetCameraPosition
         }
         func = self.control_switcher.get(command, lambda x: x)
         func(value)
@@ -160,9 +161,6 @@ class Robot_Controller(object):
             events = get_gamepad()
             for event in events:
                 try:
-    #                print("type" ,event.ev_type)
-    #                print("Code", event.code)
-    #                print("State", event.state)
                     if(event.code == "BTN_START" and event.state == 1):
                         self.threadActive = False
                         break
