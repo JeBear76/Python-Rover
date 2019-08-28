@@ -29,5 +29,5 @@ class VideoStream(object):
             text = "Greetings from..."
             font = cv2.FONT_HERSHEY_SIMPLEX
             image = cv2.putText(image, text, (10, 50), font, 0.75, (255, 0, 255), 2, cv2.LINE_AA)
-            cv2.imwrite('static/' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.png', image)
+            cv2.imwrite('static/images/' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.png', image)
 

@@ -23,10 +23,14 @@ def video_feed():
     return Response(gen(appCamera),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
+@app.route('/webcontrol')
+def web_control():
+    return render_template('webcontrol.html')
+
 @app.route('/gallery')
 def static_images():
     try:
-        lst = os.listdir('static/')
+        lst = os.listdir('static/images/')
         lst = sorted(lst)
     except OSError:
         pass
