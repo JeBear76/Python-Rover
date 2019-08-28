@@ -5,7 +5,7 @@ Created on Tue Aug 27 18:49:36 2019
 @author: jerep_000
 """
 
-from flask import Flask, Response, render_template
+from flask import Flask, Response, render_template, request
 import videostream as vs
 import os
 import robot_controller as rbc
@@ -41,7 +41,11 @@ def shutdown():
     robot.threadActive = False
     time.sleep(1)
     print('controls shutdown')
-    raise RuntimeError('server shutdown')
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    func()
+    return "Shutting down..."    
 
 if __name__ == '__main__':
     global appCamera
@@ -49,10 +53,8 @@ if __name__ == '__main__':
     appCamera = vs.VideoStream()
     robot = rbc.Robot_Controller(appCamera)
     robot.StartThisThing()
-    try:
-        app.run(host='0.0.0.0', port=3000)
-    except:
-        pass
+    app.run(host='0.0.0.0', port=3000)
+    
     
     
     
