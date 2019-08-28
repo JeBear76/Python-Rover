@@ -112,8 +112,8 @@ class Robot_Controller(object):
                 if(self.currentMotorX < 0):
                     self.rightMotorSpeed -= abs(self.currentMotorX)
 
-            self.pwmLeftMotor.ChangeDutyCycle(self.leftMotorSpeed * 30)
-            self.pwmRightMotor.ChangeDutyCycle(self.rightMotorSpeed * 30)
+            self.pwmLeftMotor.ChangeDutyCycle(self.leftMotorSpeed * 50)
+            self.pwmRightMotor.ChangeDutyCycle(self.rightMotorSpeed * 50)
 
     def rotateCamera_handler(self):
         while(self.threadActive):
