@@ -9,8 +9,6 @@ from flask import Flask, Response, render_template, request
 import videostream as vs
 import os
 import robot_controller as rbc
-import threading
-import time
         
 app = Flask(__name__)
 
@@ -29,10 +27,11 @@ def video_feed():
 def static_images():
     try:
         lst = os.listdir('static/')
+        lst = sorted(lst)
     except OSError:
         pass
 
-    return render_template('gallery.html', files = lst)
+    return render_template('gallery.html', files = lst, totalfiles = len(lst))
 
 @app.route('/shutdown')
 def shutdown():
