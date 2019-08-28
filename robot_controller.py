@@ -67,8 +67,6 @@ class Robot_Controller(object):
         return
 
     def setMotorXDirection(self, x):
-        if x < 25000 and x > -25000:
-            self.currentMotorX = 0
         if(x == -32768):
             x = -32767
         self.currentMotorX = x/32767
@@ -98,32 +96,21 @@ class Robot_Controller(object):
 
     def motorDirection_handler(self):
         while(self.threadActive):
+            self.rightMotorSpeed = abs(self.currentMotorY)
+            self.leftMotorSpeed = abs(self.currentMotorY)
+            
             if (self.currentMotorY >= 0):
                 self.setDirection(True,False,True,False)
+                if(self.currentMotorX > 0):
+                    self.rightMotorSpeed -= abs(self.currentMotorX)
+                if(self.currentMotorX < 0):
+                    self.leftMotorSpeed -= abs(self.currentMotorX)
             if (self.currentMotorY < 0):
                 self.setDirection(False,True,False,True)
-
-            if(self.currentMotorX > 0):
-                if (self.currentMotorY >= 0):
-                    self.rightMotorSpeed = 0
-                    self.leftMotorSpeed = abs(self.currentMotorX)
-
-                if (self.currentMotorY < 0):
-                    self.rightMotorSpeed = abs(self.currentMotorX)
-                    self.leftMotorSpeed = 0
-
-            if(self.currentMotorX < 0):
-                if(self.currentMotorY >= 0):
-                    self.rightMotorSpeed = abs(self.currentMotorX)
-                    self.leftMotorSpeed = 0
-
-                if(self.currentMotorY < 0):
-                    self.rightMotorSpeed = 0
-                    self.leftMotorSpeed = abs(self.currentMotorX)
-
-            if(self.currentMotorX == 0):
-                self.rightMotorSpeed = abs(self.currentMotorY)
-                self.leftMotorSpeed = abs(self.currentMotorY)
+                if(self.currentMotorX > 0):
+                    self.leftMotorSpeed -= abs(self.currentMotorX)
+                if(self.currentMotorX < 0):
+                    self.rightMotorSpeed -= abs(self.currentMotorX)
 
             self.pwmLeftMotor.ChangeDutyCycle(self.leftMotorSpeed * 30)
             self.pwmRightMotor.ChangeDutyCycle(self.rightMotorSpeed * 30)
