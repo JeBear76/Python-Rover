@@ -14,6 +14,8 @@ import socket
 import logging
 
 import videostream as vs
+import threading
+
 import robot_controller as rbc
 
 def get_ip():
@@ -28,8 +30,10 @@ def get_ip():
         s.close()
     return IP
 
-server_port = 3000     
+server_port = 3000
+video_port = 3001   
 app = Flask(__name__)
+videoapp = Flask('videoApp')
 app.config['SECRET_KEY'] = 'secretKey'
 socketio = SocketIO(app)
 
@@ -53,41 +57,60 @@ def handle_controller_event(controller_command):
     logging.info(command)
     logging.info(value)
 
-@app.route('/video_feed')
+@videoapp.route('/video_feed')
 def video_feed():
     return Response(gen(appCamera),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
-@app.route('/webcontrol')
-def web_control():
-    return render_template('webcontrol.html', host = get_ip(), port = server_port)
-
-@app.route('/gallery')
+@videoapp.route('/gallery')
 def static_images():
     try:
         lst = os.listdir('static/images/')
         lst = sorted(lst)
     except OSError:
         pass
-
     return render_template('gallery.html', files = lst, totalfiles = len(lst))
 
-@app.route('/shutdown')
+@videoapp.route('/shutdown')
 def shutdown():
-    global appCamera
     global robot
     robot.StopControls()
     func = request.environ.get('werkzeug.server.shutdown')
     if func is None:
         raise RuntimeError('Not running with the Werkzeug Server')
     func()
-    return "Shutting down..."    
+    return "Shutting down..."
+
+@app.route('/webcontrol')
+def web_control():
+    return render_template('webcontrol.html', host = get_ip(), port = server_port, videoport = video_port)
+
+#@app.route('/shutdown')
+#def shutdown():
+#    global robot
+#    robot.StopControls()
+#    func = request.environ.get('werkzeug.server.shutdown')
+#    if func is None:
+#        raise RuntimeError('Not running with the Werkzeug Server')
+#    func()
+#    return "Shutting down..."    
+
+def startVideoThread():
+    videoapp.run(host='0.0.0.0', port=video_port)
+    
 
 if __name__ == '__main__':
     global appCamera
     global robot
+    global videoappThread
     appCamera = vs.VideoStream()
     robot = rbc.Robot_Controller(appCamera)
     robot.StartThisThing()
+    
+    videoappThread = threading.Thread(target=startVideoThread)
+    videoappThread.start()
     socketio.run(app, host='0.0.0.0', port=server_port)
+    
+    
+    
     
