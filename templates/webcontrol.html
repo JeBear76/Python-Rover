@@ -5,21 +5,76 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Rover Web Control</title>
-    <link rel="stylesheet" type="text/css" href="/static/style.css" />
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css" />
+    <script src="/static/nipplejs.js"></script>
+    <script src="/static/socket.io.js"></script>
 </head>
 <body>
     <div class="row">
-        <div class="column large">
-            <img style="-webkit-user-select: none;margin: auto;" src="http://localhost:3000/video_feed">
+        <div class="col-3"></div>
+        <div class="col-6">
+            <img style="-webkit-user-select: none;margin: auto; height: auto; width: 100%;" src="http://localhost:{{ port }}/video_feed" >
         </div>
+        <div class="col-3"></div>
     </div>
     <div class="row">
-        <div class="column">
-            <h2>Car Control</h2>
+        <div class="col-3"></div>
+        <div class="col-3">
+            <div class="row" style="height: 120px; width: auto;">
+                <div class="zone active" id="car_joystick"></div>
+            </div>
         </div>
-        <div class="column">
-            <h2>Turret Control</h2>
+        <div class="col-3">
+            <div class="row" style="height: 120px; width: auto;">
+                <div class="zone active" id="turret_joystick"></div>
+            </div>
         </div>
+        <div class="col-3"></div>
     </div>
+    <script>
+        var socket = io('http://{{ host }}:{{ port }}')
+        socket.on('connect', function(){
+            socket.emit('event', 'Client connected');
+            console.log('event', 'Client connected');
+        })
+        function bindNipple(joystick, x_command, y_command) {
+            joystick.on('start end', function(evt, data) {
+                
+            }).on('move', function(evt, data) {
+                let angle = data.angle.radian;
+                let distance = data.distance;
+                let x = (distance/50) * Math.cos(angle) * 32767
+                let y = (distance/50) * Math.sin(angle) * 32767
+                socket.emit('controller', { command: x_command, value: x});
+                socket.emit('controller', { command: y_command, value: y});
+                console.log('x', x);
+                console.log('y', y);
+            }).on('pressure', function(evt, data) {
+                
+            });
+        }
+        var carJoystick = nipplejs.create({
+            zone: document.getElementById('car_joystick'),
+            mode: 'static',
+            position: {left: '50%', top: '50%'},
+            color: 'red'
+        });
+        var turretJoystick = nipplejs.create({
+            zone: document.getElementById('turret_joystick'),
+            mode: 'static',
+            position: {left: '50%', top: '50%'},
+            color: 'purple'
+        });
+        bindNipple(carJoystick, "ABS_X", "ABS_Y")
+        bindNipple(turretJoystick, "ABS_RX", "ABS_RY")
+    </script>
 </body>
 </html>
+<!--
+    "ABS_RX"    turret X
+    "ABS_RY"    turret Y
+    "ABS_X"     car X
+    "ABS_Y"     car Y
+    "BTN_SOUTH" take picture
+    "BTN_EAST"  reset camera
+-->
