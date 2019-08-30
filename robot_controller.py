@@ -144,7 +144,7 @@ class Robot_Controller(object):
         self.camera.save_image()
         return
 
-    def sendCommand(self, command, value):
+    def sendCommand(self, command, value, fromController):
         #print (command, value)
         self.control_switcher = {
             "ABS_RX": self.setRotateCameraX,
@@ -154,6 +154,10 @@ class Robot_Controller(object):
             "BTN_SOUTH": self.takePicture,
             "BTN_EAST": self.resetCameraPosition
         }
+        if(not fromController):
+            if (command == "ABS_X" or command == "ABS_Y"):
+                value = -value
+            
         func = self.control_switcher.get(command, lambda x: x)
         func(value)
 
@@ -170,7 +174,7 @@ class Robot_Controller(object):
                         if(event.code == "BTN_START" and event.state == 1):
                             self.gameControllerActive = False
                             break
-                        self.sendCommand(event.code, event.state)
+                        self.sendCommand(event.code, event.state, True)
                     except Exception as err:
                         print(format(err))
                         self.StopControls()
