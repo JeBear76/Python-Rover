@@ -51,11 +51,13 @@
                 let x = (distance/50) * Math.cos(angle) * 32767
                 let y = (distance/50) * Math.sin(angle) * 32767
                 if(Math.abs(x) > 3000){
-                    socket.emit('controller', '{ "command": "' + x_command + '", "value": ' + Math.round(x) + ' }');
+                    x = 0;
                 }
+                socket.emit('controller', '{ "command": "' + x_command + '", "value": ' + Math.round(x) + ' }');
                 if(Math.abs(y) > 3000){
-                    socket.emit('controller', '{ "command": "' + y_command + '", "value": ' + Math.round(y) + ' }');
+                    y = 0;
                 }
+                socket.emit('controller', '{ "command": "' + y_command + '", "value": ' + Math.round(y) + ' }');
             }, 100)).on('pressure', function(evt, data) {
                 
             });
