@@ -56,12 +56,12 @@
             joystick.on('end', function(evt, data) {
                 socket.emit('controller', '{ "command": "' + x_command + '", "value": 0 }');
                 socket.emit('controller', '{ "command": "' + y_command + '", "value": 0 }');
-            }).on('move', debounce(function(evt, data) {
+            }).on('move', function(evt, data) {
                 let threshold = 2500;
                 let angle = data.angle.radian;
                 let distance = data.distance;
-                let x = (distance/50) * Math.cos(angle) * 32767
-                let y = (distance/50) * Math.sin(angle) * 32767
+                let x = (distance/50) * Math.cos(angle) * 16283
+                let y = (distance/50) * Math.sin(angle) * 16283
                 if(Math.abs(x) < threshold){
                     x = 0;
                 }
@@ -70,7 +70,7 @@
                     y = 0;
                 }
                 socket.emit('controller', '{ "command": "' + y_command + '", "value": ' + Math.round(y) + ' }');
-            }, 250)).on('pressure', function(evt, data) {
+            }).on('pressure', function(evt, data) {
                 
             });
         }
