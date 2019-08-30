@@ -97,7 +97,7 @@ def handle_controller_event(sid, controller_command):
     print('\x1b[1;36;40m' + controller_command + '\x1b[0m')
     command = webcommand['command']
     value = webcommand['value']
-    robot.sendCommand(command, value) 
+    robot.sendCommand(command, value, False) 
     sio.send(sid, 'message', 'command: ' +  command + ' received ' + str(value))
     
 
