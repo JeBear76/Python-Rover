@@ -6,9 +6,7 @@ Created on Tue Aug 27 18:49:36 2019
 """
 
 from flask import Flask, Response, render_template, request, send_from_directory
-
-from flask_socketio import SocketIO
-from flask_cors import CORS
+import socketio
 import json
 
 import os
@@ -17,7 +15,7 @@ import socket
 import videostream as vs
 import threading
 
-#import robot_controller as rbc
+import robot_controller as rbc
 
 def get_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -41,6 +39,11 @@ server_port = 3000
 video_port = 3001   
 videoapp = Flask('videoApp')
 
+app = Flask(__name__)
+
+sio = socketio.Server(async_mode='threading', cors_allowed_origins = '*');
+app.wsgi_app = socketio.WSGIApp(sio, app.wsgi_app)
+
 @videoapp.route('/video_feed')
 def video_feed():
     return Response(gen(appCamera),
@@ -59,13 +62,12 @@ def static_images():
 def shutdown():
     global appCamera
     global robot
-#    robot.StopControls()
+    robot.StopControls()
     func = request.environ.get('werkzeug.server.shutdown')
     if func is None:
         raise RuntimeError('Not running with the Werkzeug Server')
     func()
     appCamera.stop_stream()
-    socketio.stop()
     return "Shutting down..."
 
 @videoapp.route('/webcontrol')
@@ -79,29 +81,25 @@ def favicon():
 def startVideoThread():
     videoapp.run(host='0.0.0.0', port=video_port)
 
-app = Flask(__name__)
+@sio.on('connection')
+def handle_connection(sid):
+    print('\x1b[1;31;40mClient connected' + '\x1b[0m')
 
-app.config['SECRET_KEY'] = 'secretKey'
-socketio = SocketIO(app = app, kwargs = { 'cors_allowed_origin' : '*' })
+@sio.on('event')
+def handle_event(sid, message):
+    print('\x1b[1;36;40m' + message + '\x1b[0m')
+    sio.send(sid, 'message', message)
 
-@socketio.on('connection', namespace='io')
-def handle_connection():
-    print('Client connected')
-
-@socketio.on('event', namespace='io')
-def handle_event(message):
-    print(message)
-    socketio.emit('message', message)
-
-@socketio.on('controller', namespace='io')
-def handle_controller_event(controller_command):
+@sio.on('controller')
+def handle_controller_event(sid, controller_command):
     global robot
     webcommand = json.loads(controller_command)
-    command = webcommand.command
-    value = webcommand.value    
-#    robot.sendCommand(command, value) 
-    socketio.emit('message', 'command: ' +  command + ' received ' + str(value))
-
+    print('\x1b[1;36;40m' + controller_command + '\x1b[0m')
+    command = webcommand['command']
+    value = webcommand['value']
+    robot.sendCommand(command, value) 
+    sio.send(sid, 'message', 'command: ' +  command + ' received ' + str(value))
+    
 
     
 if __name__ == '__main__':
@@ -109,12 +107,12 @@ if __name__ == '__main__':
     global robot
     global videoappThread
     appCamera = vs.VideoStream()
-#    robot = rbc.Robot_Controller(appCamera)
-#    robot.StartThisThing()
+    robot = rbc.Robot_Controller(appCamera)
+    robot.StartThisThing()
     
     videoappThread = threading.Thread(target=startVideoThread)
     videoappThread.start()
-    socketio.run(app, host='0.0.0.0', port=server_port)
+    app.run(host='0.0.0.0', port=server_port, threaded = True)
     
     
     

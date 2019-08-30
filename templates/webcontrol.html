@@ -8,6 +8,7 @@
     <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css" />
     <script src="/static/nipplejs.js"></script>
     <script src="/static/socket.io.js"></script>
+    <script src="/static/debounce.js"></script>
 </head>
 <body>
     <div class="row">
@@ -32,7 +33,8 @@
         <div class="col-3"></div>
     </div>
     <script>
-        var socket = io('ws://{{ host }}:{{ port }}/io');
+
+        var socket = io.connect('ws://{{ host }}:{{ port }}');
         
         socket.on('connect', function(){
             socket.emit('event', 'I\'m the connected client!');
@@ -42,14 +44,19 @@
         function bindNipple(joystick, x_command, y_command) {
             joystick.on('start end', function(evt, data) {
                 
-            }).on('move', function(evt, data) {
+            }).on('move', debounce(function(evt, data) {
+                let threshold = 3000;
                 let angle = data.angle.radian;
                 let distance = data.distance;
                 let x = (distance/50) * Math.cos(angle) * 32767
                 let y = (distance/50) * Math.sin(angle) * 32767
-                socket.emit('controller', "{ 'command': '" + x_command + "', 'value': " + Math.round(x) + " }");
-                socket.emit('controller', "{ 'command': '" + y_command + "', 'value': " + Math.round(y) + " }");
-            }).on('pressure', function(evt, data) {
+                if(Math.abs(x) > 3000){
+                    socket.emit('controller', '{ "command": "' + x_command + '", "value": ' + Math.round(x) + ' }');
+                }
+                if(Math.abs(y) > 3000){
+                    socket.emit('controller', '{ "command": "' + y_command + '", "value": ' + Math.round(y) + ' }');
+                }
+            }, 100)).on('pressure', function(evt, data) {
                 
             });
         }
