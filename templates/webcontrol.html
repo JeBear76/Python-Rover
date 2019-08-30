@@ -57,20 +57,20 @@
                 socket.emit('controller', '{ "command": "' + x_command + '", "value": 0 }');
                 socket.emit('controller', '{ "command": "' + y_command + '", "value": 0 }');
             }).on('move', debounce(function(evt, data) {
-                let threshold = 3000;
+                let threshold = 2500;
                 let angle = data.angle.radian;
                 let distance = data.distance;
                 let x = (distance/50) * Math.cos(angle) * 32767
                 let y = (distance/50) * Math.sin(angle) * 32767
-                if(Math.abs(x) < 3000){
+                if(Math.abs(x) < threshold){
                     x = 0;
                 }
                 socket.emit('controller', '{ "command": "' + x_command + '", "value": ' + Math.round(x) + ' }');
-                if(Math.abs(y) < 3000){
+                if(Math.abs(y) < threshold){
                     y = 0;
                 }
                 socket.emit('controller', '{ "command": "' + y_command + '", "value": ' + Math.round(y) + ' }');
-            }, 100)).on('pressure', function(evt, data) {
+            }, 250)).on('pressure', function(evt, data) {
                 
             });
         }
