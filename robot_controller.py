@@ -155,7 +155,7 @@ class Robot_Controller(object):
             "BTN_EAST": self.resetCameraPosition
         }
         if(not fromController):
-            if (command == "ABS_X" or command == "ABS_Y"):
+            if (command == "ABS_Y"):
                 value = -value
             
         func = self.control_switcher.get(command, lambda x: x)
