@@ -73,32 +73,24 @@ def static_images():
 
 @videoapp.route('/shutdown')
 def shutdown():
+    global appCamera
     global robot
     robot.StopControls()
     func = request.environ.get('werkzeug.server.shutdown')
     if func is None:
         raise RuntimeError('Not running with the Werkzeug Server')
     func()
+    appCamera.stop_stream()
+    socketio.stop()
     return "Shutting down..."
 
 @app.route('/webcontrol')
 def web_control():
     return render_template('webcontrol.html', host = get_ip(), port = server_port, videoport = video_port)
 
-#@app.route('/shutdown')
-#def shutdown():
-#    global robot
-#    robot.StopControls()
-#    func = request.environ.get('werkzeug.server.shutdown')
-#    if func is None:
-#        raise RuntimeError('Not running with the Werkzeug Server')
-#    func()
-#    return "Shutting down..."    
-
 def startVideoThread():
     videoapp.run(host='0.0.0.0', port=video_port)
     
-
 if __name__ == '__main__':
     global appCamera
     global robot

@@ -14,6 +14,9 @@ class VideoStream(object):
     def __del__(self):
         self.video.release()
 
+    def stop_stream(self):
+        self.video.release()
+
     def get_frame(self):
         _, image = self.video.read()
 
