@@ -34,7 +34,7 @@ def gen(camera):
         frame = camera.get_frame()
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
-        
+
 server_port = 3000
 video_port = 3001   
 videoapp = Flask('videoApp')
@@ -81,9 +81,17 @@ def favicon():
 def startVideoThread():
     videoapp.run(host='0.0.0.0', port=video_port)
 
-@sio.on('connection')
-def handle_connection(sid):
-    print('\x1b[1;31;40mClient connected' + '\x1b[0m')
+@sio.event
+def connect(sid, environ):
+    global prev_sid
+    if prev_sid != sid:
+        sio.disconnect(prev_sid)
+        prev_sid = sid
+        print('\x1b[1;31;40mClient connected' + '\x1b[0m')        
+
+@sio.event
+def disconnect(sid):
+    print('\x1b[1;31;40mClient disconnected' + '\x1b[0m')
 
 @sio.on('event')
 def handle_event(sid, message):
