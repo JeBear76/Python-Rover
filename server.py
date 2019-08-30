@@ -35,6 +35,7 @@ def gen(camera):
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
+prev_sid = None
 server_port = 3000
 video_port = 3001   
 videoapp = Flask('videoApp')
