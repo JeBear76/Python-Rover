@@ -7,6 +7,7 @@ class Robot_Controller(object):
     def __init__(self, camera):
         self.camera = camera
         self.threadActive = True
+        self.gameControllerActive = True
         self.rotateOn = False
         self.tiltOn = False
 
@@ -157,17 +158,17 @@ class Robot_Controller(object):
         func(value)
 
     def gamepad_handler(self):
-        while self.threadActive:
+        while self.gameControllerActive:
             try:
                 events = get_gamepad()
             except:
                 print('No Controller found.')
-                self.StopControls()
+                self.gameControllerActive = False
             else:
                 for event in events:
                     try:
                         if(event.code == "BTN_START" and event.state == 1):
-                            self.threadActive = False
+                            self.gameControllerActive = False
                             break
                         self.sendCommand(event.code, event.state)
                     except Exception as err:
@@ -190,7 +191,9 @@ class Robot_Controller(object):
         self.gamePadThread.start()
         
     def StopControls(self):
+        self.gameControllerActive = False
         self.threadActive = False
+        GPIO.cleanup()
         print('Controls shutdown.')
         
 
