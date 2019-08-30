@@ -32,10 +32,12 @@
         <div class="col-3"></div>
     </div>
     <script>
-        var socket = io('http://{{ host }}:{{ port }}')
+        var socket = io('ws://{{ host }}:{{ port }}/io');
+        
         socket.on('connect', function(){
-            socket.emit('event', 'Client connected');
-            console.log('event', 'Client connected');
+            socket.emit('event', 'I\'m the connected client!');
+        }).on('message', function(message){
+            console.log('message', message);
         })
         function bindNipple(joystick, x_command, y_command) {
             joystick.on('start end', function(evt, data) {
@@ -45,10 +47,8 @@
                 let distance = data.distance;
                 let x = (distance/50) * Math.cos(angle) * 32767
                 let y = (distance/50) * Math.sin(angle) * 32767
-                socket.emit('controller', "{ 'command': '" + x_command + "', 'value': '" + str(x) + "' }");
-                socket.emit('controller', "{ 'command': '" + y_command + "', 'value': '" + str(y) + "' }");
-                console.log('x', x);
-                console.log('y', y);
+                socket.emit('controller', "{ 'command': '" + x_command + "', 'value': " + Math.round(x) + " }");
+                socket.emit('controller', "{ 'command': '" + y_command + "', 'value': " + Math.round(y) + " }");
             }).on('pressure', function(evt, data) {
                 
             });

@@ -5,18 +5,19 @@ Created on Tue Aug 27 18:49:36 2019
 @author: jerep_000
 """
 
-from flask import Flask, Response, render_template, request
+from flask import Flask, Response, render_template, request, send_from_directory
+
 from flask_socketio import SocketIO
+from flask_cors import CORS
 import json
 
 import os
 import socket
-import logging
 
 import videostream as vs
 import threading
 
-import robot_controller as rbc
+#import robot_controller as rbc
 
 def get_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -30,32 +31,15 @@ def get_ip():
         s.close()
     return IP
 
-server_port = 3000
-video_port = 3001   
-app = Flask(__name__)
-videoapp = Flask('videoApp')
-app.config['SECRET_KEY'] = 'secretKey'
-socketio = SocketIO(app)
-
 def gen(camera):
     while True:
         frame = camera.get_frame()
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
-
-@socketio.on('event')
-def handle_event(message):
-    logging.info(message)
-
-@socketio.on('controller')
-def handle_controller_event(controller_command):
-    global robot
-    webcommand = json.loads(controller_command)
-    command = webcommand.command
-    value = webcommand.value    
-    robot.sendCommand(command, value)    
-    logging.info(command)
-    logging.info(value)
+        
+server_port = 3000
+video_port = 3001   
+videoapp = Flask('videoApp')
 
 @videoapp.route('/video_feed')
 def video_feed():
@@ -75,7 +59,7 @@ def static_images():
 def shutdown():
     global appCamera
     global robot
-    robot.StopControls()
+#    robot.StopControls()
     func = request.environ.get('werkzeug.server.shutdown')
     if func is None:
         raise RuntimeError('Not running with the Werkzeug Server')
@@ -84,20 +68,49 @@ def shutdown():
     socketio.stop()
     return "Shutting down..."
 
-@app.route('/webcontrol')
+@videoapp.route('/webcontrol')
 def web_control():
     return render_template('webcontrol.html', host = get_ip(), port = server_port, videoport = video_port)
 
+@videoapp.route('/favicon.ico') 
+def favicon():
+    return send_from_directory(os.path.join(videoapp.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
 def startVideoThread():
     videoapp.run(host='0.0.0.0', port=video_port)
+
+app = Flask(__name__)
+
+app.config['SECRET_KEY'] = 'secretKey'
+socketio = SocketIO(app = app, kwargs = { 'cors_allowed_origin' : '*' })
+
+@socketio.on('connection', namespace='io')
+def handle_connection():
+    print('Client connected')
+
+@socketio.on('event', namespace='io')
+def handle_event(message):
+    print(message)
+    socketio.emit('message', message)
+
+@socketio.on('controller', namespace='io')
+def handle_controller_event(controller_command):
+    global robot
+    webcommand = json.loads(controller_command)
+    command = webcommand.command
+    value = webcommand.value    
+#    robot.sendCommand(command, value) 
+    socketio.emit('message', 'command: ' +  command + ' received ' + str(value))
+
+
     
 if __name__ == '__main__':
     global appCamera
     global robot
     global videoappThread
     appCamera = vs.VideoStream()
-    robot = rbc.Robot_Controller(appCamera)
-    robot.StartThisThing()
+#    robot = rbc.Robot_Controller(appCamera)
+#    robot.StartThisThing()
     
     videoappThread = threading.Thread(target=startVideoThread)
     videoappThread.start()
