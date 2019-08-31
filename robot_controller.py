@@ -9,7 +9,7 @@ class Robot_Controller(object):
         if pin < 1 or pin > 40:
             return -1
         else:
-            return BOARD2BCM[pin-1]
+            return self.BOARD2BCM[pin-1]
         
     def __init__(self, camera):        
         self.BOARD2BCM=[-1, -1,  2, -1,  3, -1,  4, 14,
