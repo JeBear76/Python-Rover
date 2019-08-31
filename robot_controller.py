@@ -211,6 +211,14 @@ class Robot_Controller(object):
                     self.pwmTilt.ChangeDutyCycle(self.cameraYcurrent)
                 time.sleep(0.01)
 
+    def iR_handler(self):
+        while(self.threadActive):
+            l = bool(self.pi.read(self.leftIR))
+            r = bool(self.pi.read(self.rightIR))
+            self.camera.set_warning_overlay(l, r)
+            time.sleep(0.5)
+            
+        
     def takePicture(self, i):
         self.camera.save_image()
         return
