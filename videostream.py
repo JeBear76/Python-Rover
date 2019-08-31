@@ -14,7 +14,7 @@ class VideoStream(object):
         self.leftOverlay = False
         self.rightOverlay = False
         self.video = cv2.VideoCapture(0)
-        img = self.video.read()
+        _, img = self.video.read()
         self.h = np.size(img, 0)
         self.w = np.size(img, 1)
         
