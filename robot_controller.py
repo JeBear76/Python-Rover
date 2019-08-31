@@ -5,18 +5,7 @@ import pigpio
 import time
 
 class Robot_Controller(object):
-    def Board_to_BCM(self, pin):
-        if pin < 1 or pin > 40:
-            return -1
-        else:
-            return self.BOARD2BCM[pin-1]
-        
     def __init__(self, camera):        
-        self.BOARD2BCM=[-1, -1,  2, -1,  3, -1,  4, 14,
-                       -1, 15, 17, 18, 27, -1, 22, 23,
-                       -1, 24, 10, -1,  9, 25, 11,  8,
-                       -1,  7,  0,  1,  5, -1,  6, 12,
-                       13, -1, 19, 16, 26, 20, -1, 21]
         
         self.usePigPio = False
         self.camera = camera
@@ -28,16 +17,19 @@ class Robot_Controller(object):
         self.currentMotorX = 0
         self.currentMotorY = 0
 
-        self.ENA = 31
-        self.ENB = 37
-        self.IN1 = 33
-        self.IN2 = 32
-        self.IN3 = 38
-        self.IN4 = 40
+        self.ENA = 6
+        self.ENB = 26
+        self.IN1 = 12
+        self.IN2 = 13
+        self.IN3 = 20
+        self.IN4 = 21
 
-        self.servoH = 13
-        self.servoV = 15
+        self.servoH = 27
+        self.servoV = 22
 
+        self.leftIR = 19
+        self.rightIR = 16
+        
         try:
             self.pi = pigpio.pi()
         except:
@@ -69,7 +61,7 @@ class Robot_Controller(object):
         self.resetCameraPosition(0)
             
     def initRpi(self):
-        GPIO.setmode(GPIO.BOARD)
+        GPIO.setmode(GPIO.BCM)
 
         #Motor A
         GPIO.setup(self.ENA, GPIO.OUT)
@@ -95,18 +87,18 @@ class Robot_Controller(object):
         
     def initPigPio(self):
         #Motor A
-        self.pi.set_mode(self.Board_to_BCM(self.ENA), pigpio.OUTPUT)
-        self.pi.set_mode(self.Board_to_BCM(self.IN1), pigpio.OUTPUT)
-        self.pi.set_mode(self.Board_to_BCM(self.IN2), pigpio.OUTPUT)
+        self.pi.set_mode(self.ENA, pigpio.OUTPUT)
+        self.pi.set_mode(self.IN1, pigpio.OUTPUT)
+        self.pi.set_mode(self.IN2, pigpio.OUTPUT)
 	    #Motor B
-        self.pi.set_mode(self.Board_to_BCM(self.ENB), pigpio.OUTPUT)
-        self.pi.set_mode(self.Board_to_BCM(self.IN3), pigpio.OUTPUT)
-        self.pi.set_mode(self.Board_to_BCM(self.IN4), pigpio.OUTPUT)
+        self.pi.set_mode(self.ENB, pigpio.OUTPUT)
+        self.pi.set_mode(self.IN3, pigpio.OUTPUT)
+        self.pi.set_mode(self.IN4, pigpio.OUTPUT)
         
         #Camera Servo Rotation
-        self.pi.set_mode(self.Board_to_BCM(self.servoH), pigpio.OUTPUT)
+        self.pi.set_mode(self.servoH, pigpio.OUTPUT)
         #Camera Servo Tilt
-        self.pi.set_mode(self.Board_to_BCM(self.servoV), pigpio.OUTPUT)
+        self.pi.set_mode(self.servoV, pigpio.OUTPUT)
         
 
     def __del__(self):
@@ -146,19 +138,19 @@ class Robot_Controller(object):
         self.cameraXcurrent = self.cameraXReset
         self.cameraYcurrent = self.cameraYReset
         if self.usePigPio:
-            self.pi.set_servo_pulsewidth(self.Board_to_BCM(self.servoH), self.cameraXcurrent)
-            self.pi.set_servo_pulsewidth(self.Board_to_BCM(self.servoV), self.cameraYcurrent)
+            self.pi.set_servo_pulsewidth(self.servoH, self.cameraXcurrent)
+            self.pi.set_servo_pulsewidth(self.servoV, self.cameraYcurrent)
         else:
             self.pwmRotation.ChangeDutyCycle(self.cameraXcurrent)
             self.pwmTilt.ChangeDutyCycle(self.cameraYcurrent)
         
         
-    def setDirection(self, in1,in2,in3,in4):
+    def setDirection(self, in2,in1,in3,in4):
         if self.usePigPio:
-            self.pi.write(self.Board_to_BCM(self.IN1), in1)
-            self.pi.write(self.Board_to_BCM(self.IN2), in2)
-            self.pi.write(self.Board_to_BCM(self.IN3), in3)
-            self.pi.write(self.Board_to_BCM(self.IN4), in4)
+            self.pi.write(self.IN1, in1)
+            self.pi.write(self.IN2, in2)
+            self.pi.write(self.IN3, in3)
+            self.pi.write(self.IN4, in4)
         else:
             GPIO.output(self.IN1, in1)
             GPIO.output(self.IN2, in2)
@@ -184,8 +176,8 @@ class Robot_Controller(object):
                     self.leftMotorSpeed += abs(self.currentMotorX)/2
                     
             if self.usePigPio:
-                self.pi.set_PWM_dutycycle(self.Board_to_BCM(self.ENB), self.leftMotorSpeed * 255)
-                self.pi.set_PWM_dutycycle(self.Board_to_BCM(self.ENA), self.rightMotorSpeed * 255)
+                self.pi.set_PWM_dutycycle(self.ENB, self.leftMotorSpeed * 255)
+                self.pi.set_PWM_dutycycle(self.ENA, self.rightMotorSpeed * 255)
             else:
                 self.pwmLeftMotor.ChangeDutyCycle(self.leftMotorSpeed * 50)
                 self.pwmRightMotor.ChangeDutyCycle(self.rightMotorSpeed * 50)
@@ -200,7 +192,7 @@ class Robot_Controller(object):
                     self.cameraXcurrent = self.cameraXmax
                     
                 if self.usePigPio:
-                    self.pi.set_servo_pulsewidth(self.Board_to_BCM(self.servoH), self.cameraXcurrent)
+                    self.pi.set_servo_pulsewidth(self.servoH, self.cameraXcurrent)
                 else:
                     self.pwmRotation.ChangeDutyCycle(self.cameraXcurrent)
                 time.sleep(0.01)
@@ -214,7 +206,7 @@ class Robot_Controller(object):
                 if(self.cameraYcurrent >= self.cameraYmax):
                     self.cameraYcurrent = self.cameraYmax
                 if self.usePigPio:
-                    self.pi.set_servo_pulsewidth(self.Board_to_BCM(self.servoV), self.cameraYcurrent)
+                    self.pi.set_servo_pulsewidth(self.servoV, self.cameraYcurrent)
                 else:
                     self.pwmTilt.ChangeDutyCycle(self.cameraYcurrent)
                 time.sleep(0.01)
