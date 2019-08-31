@@ -97,13 +97,13 @@ class Robot_Controller(object):
         
     def initPigPio(self):
         #Motor A
-        self.pi.set_mode(self.Board_to_BCM(self.ENA, pigpio.OUTPUT))
-        self.pi.set_mode(self.Board_to_BCM(self.IN1, pigpio.OUTPUT))
-        self.pi.set_mode(self.Board_to_BCM(self.IN2, pigpio.OUTPUT))
+        self.pi.set_mode(self.Board_to_BCM(self.ENA), pigpio.OUTPUT)
+        self.pi.set_mode(self.Board_to_BCM(self.IN1), pigpio.OUTPUT)
+        self.pi.set_mode(self.Board_to_BCM(self.IN2), pigpio.OUTPUT)
 	    #Motor B
-        self.pi.set_mode(self.Board_to_BCM(self.ENB, pigpio.OUTPUT))
-        self.pi.set_mode(self.Board_to_BCM(self.IN3, pigpio.OUTPUT))
-        self.pi.set_mode(self.Board_to_BCM(self.IN4, pigpio.OUTPUT))
+        self.pi.set_mode(self.Board_to_BCM(self.ENB), pigpio.OUTPUT)
+        self.pi.set_mode(self.Board_to_BCM(self.IN3), pigpio.OUTPUT)
+        self.pi.set_mode(self.Board_to_BCM(self.IN4), pigpio.OUTPUT)
         
         #Camera Servo Rotation
         self.pi.set_mode(self.Board_to_BCM(self.servoH), pigpio.OUTPUT)
