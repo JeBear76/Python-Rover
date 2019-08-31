@@ -184,8 +184,8 @@ class Robot_Controller(object):
                     self.leftMotorSpeed += abs(self.currentMotorX)/2
                     
             if self.usePigPio:
-                self.pi.set_PWM_dutycycle(self.Board_to_BCM(self.ENB), self.leftMotorSpeed * 128)
-                self.pi.set_PWM_dutycycle(self.Board_to_BCM(self.ENA), self.rightMotorSpeed * 128)
+                self.pi.set_PWM_dutycycle(self.Board_to_BCM(self.ENB), self.leftMotorSpeed * 255)
+                self.pi.set_PWM_dutycycle(self.Board_to_BCM(self.ENA), self.rightMotorSpeed * 255)
             else:
                 self.pwmLeftMotor.ChangeDutyCycle(self.leftMotorSpeed * 50)
                 self.pwmRightMotor.ChangeDutyCycle(self.rightMotorSpeed * 50)
