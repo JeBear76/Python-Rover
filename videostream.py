@@ -29,7 +29,7 @@ class VideoStream(object):
         
         font = cv2.FONT_HERSHEY_SIMPLEX
         text = "Rover - " +  datetime.datetime.now().strftime("%a %d %m %Y %X")
-        image = cv2.putText(image, text, (20, 20), font, 0.75, (255, 0, 0), 2, cv2.LINE_AA)
+        image = cv2.putText(image, text, (20, 40), font, 0.75, (255, 0, 0), 2, cv2.LINE_AA)
 
         if self.leftOverlay:
             image = cv2.putText(image, self.overlayText, (20, self.h - 20), font, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
