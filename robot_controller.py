@@ -264,13 +264,14 @@ class Robot_Controller(object):
         self.camRotateThread = threading.Thread(target=self.rotateCamera_handler)
         self.camTiltThread = threading.Thread(target=self.tiltCamera_handler)
         self.motorThread = threading.Thread(target=self.motorDirection_handler)
-
+        self.irThread = threading.Thread(target=self.iR_handler)
         self.gamePadThread = threading.Thread(target=self.gamepad_handler)
 
         print ("Controls starting")
         self.camRotateThread.start()
         self.camTiltThread.start()
         self.motorThread.start()
+        self.irThread.start()
         self.gamePadThread.start()
         
     def StopControls(self):
