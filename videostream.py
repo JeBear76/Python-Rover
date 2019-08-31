@@ -29,7 +29,7 @@ class VideoStream(object):
         
         font = cv2.FONT_HERSHEY_SIMPLEX
         text = "Rover - " +  datetime.datetime.now().strftime("%a %d %m %Y %X")
-        image = cv2.putText(image, text, (50, 50), font, 0.75, (255, 0, 0), 2, cv2.LINE_AA)
+        image = cv2.putText(image, text, (20, 20), font, 0.75, (255, 0, 0), 2, cv2.LINE_AA)
 
         if self.leftOverlay:
             image = cv2.putText(image, self.overlayText, (20, self.h - 20), font, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
@@ -44,11 +44,11 @@ class VideoStream(object):
         if success:
             text = "Greetings from..."
             font = cv2.FONT_HERSHEY_SIMPLEX
-            image = cv2.putText(image, text, (10, 50), font, 0.75, (255, 0, 255), 2, cv2.LINE_AA)                
+            image = cv2.putText(image, text, (20, 40), font, 0.75, (255, 0, 255), 2, cv2.LINE_AA)                
             cv2.imwrite('static/images/' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.png', image)
 
     def set_warning_overlay(self, leftIR, rightIR):
-        self.leftOverlay = leftIR
-        self.rightOverlay = rightIR
+        self.leftOverlay = not leftIR
+        self.rightOverlay = not rightIR
         
         
