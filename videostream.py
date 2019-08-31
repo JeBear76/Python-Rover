@@ -32,9 +32,9 @@ class VideoStream(object):
         image = cv2.putText(image, text, (50, 50), font, 0.75, (255, 0, 0), 2, cv2.LINE_AA)
 
         if self.leftOverlay:
-            image = cv2.putText(image, self.overlayText, (20, h - 20), font, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
+            image = cv2.putText(image, self.overlayText, (20, self.h - 20), font, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
         if self.rightOverlay:
-            image = cv2.putText(image, self.overlayText, (w - 120, h - 20), font, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
+            image = cv2.putText(image, self.overlayText, (self.w - 120, self.h - 20), font, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
             
         _, jpeg = cv2.imencode('.jpg', image)
         return jpeg.tobytes()
