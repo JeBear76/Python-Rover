@@ -216,7 +216,7 @@ class Robot_Controller(object):
             l = bool(self.pi.read(self.leftIR))
             r = bool(self.pi.read(self.rightIR))
             self.camera.set_warning_overlay(l, r)
-            time.sleep(0.5)
+            time.sleep(0.1)
             
         
     def takePicture(self, i):
