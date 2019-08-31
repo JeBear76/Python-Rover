@@ -115,6 +115,7 @@ if __name__ == '__main__':
     global appCamera
     global robot
     global videoappThread
+    print('\x1b[1;31;40m' + get_ip() + '\x1b[0m')
     appCamera = vs.VideoStream()
     robot = rbc.Robot_Controller(appCamera)
     robot.StartThisThing()
