@@ -1,4 +1,4 @@
-# Basic .gitattributes for a python repo.
+static/* linguist-vendored
 
 # Source files
 # ============
