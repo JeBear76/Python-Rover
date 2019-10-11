@@ -78,9 +78,21 @@ Clone this repository
 git clone "https://github.com/JeBear76/Python-Rover.git"
 ```
 
-Finally
+Create the Configuration File
 ```
 cd ./Python-Rover
+python3 ./config_writer.py
+```
+If you are using the AlphaBot, you can just press enter until done.
+If not, you will have to populate at least the pin numbers.
+
+Finally
+```
 python3 server.py
 ```
+When the server starts, it will show you the IP address of your Raspberry (if you don't already know it)
+From a computer on your wifi network, go to 
+http://[IP of the Pi]:3001/webcontrol
 
+If all went well, you should see a FPV of the robot, 2 controller buttons and 2 action buttons.
+Happy roaming!

@@ -5,7 +5,7 @@ def recursiveConfig(configSection, depth=0):
     for item in configSection.keys():
         value = configSection[item]
         if type(value) == int or type(value) == float:
-            val = input('{}{} ({}):'.format('=' * depth ,item , value))
+            val = input('{} {} ({}):'.format('=' * depth ,item , value))
             try:
                 val = type(value)(val)
                 configSection[item] = val
@@ -13,7 +13,7 @@ def recursiveConfig(configSection, depth=0):
                 pass
         else:
             print('=' * depth, end='')
-            print(item, end='')
+            print(' ' + item)
             recursiveConfig(value, depth + 1)
 
 with shelve.open(c.config) as config:
