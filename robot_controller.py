@@ -112,8 +112,8 @@ class Robot_Controller(object):
         self.cameraYdelta = -direction / self.constValues[c.cameraDeltaDivider]
 
     def resetCameraPosition(self, i):
-        self.cameraXcurrent = self.cameraXReset
-        self.cameraYcurrent = self.cameraYReset
+        self.cameraXcurrent = self.constValues[c.cameraXReset]
+        self.cameraYcurrent = self.constValues[c.cameraYReset]
         if self.usePigPio:
             self.pi.set_servo_pulsewidth(self.servoH, self.cameraXcurrent)
             self.pi.set_servo_pulsewidth(self.servoV, self.cameraYcurrent)
