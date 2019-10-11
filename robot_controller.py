@@ -153,8 +153,8 @@ class Robot_Controller(object):
                     self.leftMotorSpeed += abs(self.currentMotorX)/2
                     
             if self.usePigPio:
-                self.pi.set_PWM_dutycycle(self.ENB, self.leftMotorSpeed * self.constValues[c.dutyCycleMultiplier])
-                self.pi.set_PWM_dutycycle(self.ENA, self.rightMotorSpeed * self.constValues[c.dutyCycleMultiplier])
+                self.pi.set_PWM_dutycycle(self.motorPins[c.ENB], self.leftMotorSpeed * self.constValues[c.dutyCycleMultiplier])
+                self.pi.set_PWM_dutycycle(self.motorPins[c.ENA], self.rightMotorSpeed * self.constValues[c.dutyCycleMultiplier])
             else:
                 self.pwmLeftMotor.ChangeDutyCycle(self.leftMotorSpeed * self.constValues[c.dutyCycleMultiplier])
                 self.pwmRightMotor.ChangeDutyCycle(self.rightMotorSpeed * self.constValues[c.dutyCycleMultiplier])
@@ -163,13 +163,13 @@ class Robot_Controller(object):
         while(self.threadActive):
             if self.rotateOn:
                 self.cameraXcurrent += self.cameraXdelta
-                if(self.cameraXcurrent <= self.cameraXmin):
-                    self.cameraXcurrent = self.cameraXmin
-                if(self.cameraXcurrent >= self.cameraXmax):
-                    self.cameraXcurrent = self.cameraXmax
+                if(self.cameraXcurrent <= self.constValues[c.cameraXmin]):
+                    self.cameraXcurrent = self.constValues[c.cameraXmin]
+                if(self.cameraXcurrent >= self.constValues[c.cameraXmax]):
+                    self.cameraXcurrent = self.constValues[c.cameraXmax]
                     
                 if self.usePigPio:
-                    self.pi.set_servo_pulsewidth(self.servoH, self.cameraXcurrent)
+                    self.pi.set_servo_pulsewidth(self.cameraPins[c.servoH], self.cameraXcurrent)
                 else:
                     self.pwmRotation.ChangeDutyCycle(self.cameraXcurrent)
                 time.sleep(0.01)
@@ -178,12 +178,12 @@ class Robot_Controller(object):
         while(self.threadActive):
             if self.tiltOn:
                 self.cameraYcurrent += self.cameraYdelta
-                if(self.cameraYcurrent <= self.cameraYmin):
-                    self.cameraYcurrent = self.cameraYmin
-                if(self.cameraYcurrent >= self.cameraYmax):
-                    self.cameraYcurrent = self.cameraYmax
+                if(self.cameraYcurrent <= self.constValues[c.cameraYmin]):
+                    self.cameraYcurrent = self.constValues[c.cameraYmin]
+                if(self.cameraYcurrent >= self.constValues[c.cameraYmax]):
+                    self.cameraYcurrent = self.constValues[c.cameraYmax]
                 if self.usePigPio:
-                    self.pi.set_servo_pulsewidth(self.servoV, self.cameraYcurrent)
+                    self.pi.set_servo_pulsewidth(self.cameraPins[c.servoV], self.cameraYcurrent)
                 else:
                     self.pwmTilt.ChangeDutyCycle(self.cameraYcurrent)
                 time.sleep(0.01)
