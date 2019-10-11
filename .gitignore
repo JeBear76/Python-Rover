@@ -103,3 +103,6 @@ ENV/
 .idea/
 *.iml
 .DS_Store
+*.bak
+*.dat
+*.dir

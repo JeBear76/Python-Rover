@@ -4,7 +4,6 @@ Created on Tue Aug 27 18:49:36 2019
 
 @author: jerep_000
 """
-
 from flask import Flask, Response, render_template, request, send_from_directory
 import socketio
 import json

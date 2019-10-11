@@ -3,6 +3,8 @@ import threading
 import RPi.GPIO as GPIO
 import pigpio
 import time
+import shelve
+import constants as c
 
 class Robot_Controller(object):
     def __init__(self, camera):        
@@ -16,20 +18,18 @@ class Robot_Controller(object):
 
         self.currentMotorX = 0
         self.currentMotorY = 0
-
-        self.ENA = 6
-        self.ENB = 26
-        self.IN1 = 12
-        self.IN2 = 13
-        self.IN3 = 20
-        self.IN4 = 21
-
-        self.servoH = 27
-        self.servoV = 22
-
-        self.leftIR = 19
-        self.rightIR = 16
-        
+        self.motorPins = {}
+        self.cameraPins = {}
+        self.PWMFrequencies = {}
+        self.IRPins = {}
+        self.constValues = {}
+        with shelve.open(c.config) as config:
+            self.motorPins = config[c.motorPins]
+            self.cameraPins = config[c.cameraPins]
+            self.PWMFrequencies = config[c.PWMFrequencies]
+            self.IRPins = config[c.IRPins]
+            self.constValues = config[c.constValues]
+            
         try:
             self.pi = pigpio.pi()
         except:
@@ -39,66 +39,46 @@ class Robot_Controller(object):
             self.initPigPio()
             
         self.cameraXdelta = 0
-        if self.usePigPio:     
-            self.cameraXReset = 1100
-            self.cameraXmin = 500
-            self.cameraXmax = 1700
-        else:
-            self.cameraXReset = 5
-            self.cameraXmin = 1
-            self.cameraXmax = 9
-        
         self.cameraYdelta = 0
-        if self.usePigPio:
-            self.cameraYReset = 950
-            self.cameraYmin = 500
-            self.cameraYmax = 1300
-        else:
-            self.cameraYReset = 4.5
-            self.cameraYmin = 1.5
-            self.cameraYmax = 7.5
+        self.cameraXcurrent = self.constValues[c.cameraXReset]
+        self.cameraYcurrent = self.constValues[c.cameraYReset]
+
 
         self.resetCameraPosition(0)
             
     def initRpi(self):
+        """
+        Init method for GPIO functionality. 
+        This is the fallback as pigpio is a lot better
+        """
+        self.constValues = self.constValues[c.GPIO]
         GPIO.setmode(GPIO.BCM)
-
-        #Motor A
-        GPIO.setup(self.ENA, GPIO.OUT)
-        GPIO.setup(self.IN1, GPIO.OUT)
-        GPIO.setup(self.IN2, GPIO.OUT)
-	    #Motor B
-        GPIO.setup(self.ENB, GPIO.OUT)
-        GPIO.setup(self.IN3, GPIO.OUT)
-        GPIO.setup(self.IN4, GPIO.OUT)
         
-        self.pwmRightMotor = GPIO.PWM(self.ENA, 100)
+        for motorPin in self.motorPins:
+            GPIO.setup(motorPin, GPIO.OUT)
+        
+        
+        self.pwmRightMotor = GPIO.PWM(self.motorPins[c.ENA], self.PWMFrequencies[c.motorFrequency])
         self.pwmRightMotor.start(0)
-        self.pwmLeftMotor = GPIO.PWM(self.ENB, 100)
+        self.pwmLeftMotor = GPIO.PWM(self.motorPins[c.ENB], self.PWMFrequencies[c.motorFrequency])
         self.pwmLeftMotor.start(0)
         
-        #Camera Servo Rotation
-        GPIO.setup(self.servoH, GPIO.OUT)
-        #Camera Servo Tilt
-        GPIO.setup(self.servoV, GPIO.OUT)
-
-        self.pwmRotation = GPIO.PWM(self.servoH, 50)
-        self.pwmTilt = GPIO.PWM(self.servoV, 50)
+        for cameraPin in self.cameraPins:
+            GPIO.setup(cameraPin, GPIO.OUT)
+            
+        self.pwmRotation = GPIO.PWM(self.cameraPins[c.servoH], self.PWMFrequencies[c.servoFrequency])
+        self.pwmTilt = GPIO.PWM(self.cameraPins[c.servoV], self.PWMFrequencies[c.servoFrequency])
         
     def initPigPio(self):
-        #Motor A
-        self.pi.set_mode(self.ENA, pigpio.OUTPUT)
-        self.pi.set_mode(self.IN1, pigpio.OUTPUT)
-        self.pi.set_mode(self.IN2, pigpio.OUTPUT)
-	    #Motor B
-        self.pi.set_mode(self.ENB, pigpio.OUTPUT)
-        self.pi.set_mode(self.IN3, pigpio.OUTPUT)
-        self.pi.set_mode(self.IN4, pigpio.OUTPUT)
+        """
+        pigpio init method
+        """
+        self.constValues = self.constValues[c.pigpio]
+        for motorPin in self.motorPins:
+            self.pi.set_mode(motorPin, pigpio.OUTPUT)
         
-        #Camera Servo Rotation
-        self.pi.set_mode(self.servoH, pigpio.OUTPUT)
-        #Camera Servo Tilt
-        self.pi.set_mode(self.servoV, pigpio.OUTPUT)
+        for cameraPin in self.cameraPins:
+            self.pi.set_mode(cameraPin, pigpio.OUTPUT)
         
 
     def __del__(self):
@@ -119,20 +99,14 @@ class Robot_Controller(object):
         if(direction == -32768):
             direction = -32767
         self.rotateOn = True
-        if self.usePigPio:
-            self.cameraXdelta = -direction / 3276.7
-        else:
-            self.cameraXdelta = -direction / 327670
+        self.cameraXdelta = -direction / self.constValues[c.cameraDeltaDivider]
         
 
     def setRotateCameraY(self, direction):
         if(direction == -32768):
             direction = -32767
-        if self.usePigPio:
-            self.cameraYdelta = -direction / 3276.7
-        else:
-            self.cameraYdelta = -direction/327670
         self.tiltOn = True
+        self.cameraYdelta = -direction / self.constValues[c.cameraDeltaDivider]
 
     def resetCameraPosition(self, i):
         self.cameraXcurrent = self.cameraXReset
@@ -145,17 +119,17 @@ class Robot_Controller(object):
             self.pwmTilt.ChangeDutyCycle(self.cameraYcurrent)
         
         
-    def setDirection(self, in2,in1,in3,in4):
+    def setDirection(self, in1,in2,in3,in4):
         if self.usePigPio:
-            self.pi.write(self.IN1, in1)
-            self.pi.write(self.IN2, in2)
-            self.pi.write(self.IN3, in3)
-            self.pi.write(self.IN4, in4)
+            self.pi.write(self.motorPins[c.IN2], in2)
+            self.pi.write(self.motorPins[c.IN3], in3)
+            self.pi.write(self.motorPins[c.IN1], in1)
+            self.pi.write(self.motorPins[c.IN4], in4)
         else:
-            GPIO.output(self.IN1, in1)
-            GPIO.output(self.IN2, in2)
-            GPIO.output(self.IN3, in3)
-            GPIO.output(self.IN4, in4)
+            GPIO.output(self.motorPins[c.IN1], in1)
+            GPIO.output(self.motorPins[c.IN2], in2)
+            GPIO.output(self.motorPins[c.IN3], in3)
+            GPIO.output(self.motorPins[c.IN4], in4)
 
     def motorDirection_handler(self):
         while(self.threadActive):
@@ -163,24 +137,24 @@ class Robot_Controller(object):
             self.leftMotorSpeed = abs(self.currentMotorY)
             
             if (self.currentMotorY >= 0):
-                self.setDirection(True,False,True,False)
+                self.setDirection(False,True,True,False)
                 if(self.currentMotorX > 0):
                     self.leftMotorSpeed += abs(self.currentMotorX)/2
                 if(self.currentMotorX < 0):
                     self.rightMotorSpeed += abs(self.currentMotorX)/2
             if (self.currentMotorY < 0):
-                self.setDirection(False,True,False,True)
+                self.setDirection(True,False,False,True)
                 if(self.currentMotorX > 0):
                     self.rightMotorSpeed += abs(self.currentMotorX)/2
                 if(self.currentMotorX < 0):
                     self.leftMotorSpeed += abs(self.currentMotorX)/2
                     
             if self.usePigPio:
-                self.pi.set_PWM_dutycycle(self.ENB, self.leftMotorSpeed * 255)
-                self.pi.set_PWM_dutycycle(self.ENA, self.rightMotorSpeed * 255)
+                self.pi.set_PWM_dutycycle(self.ENB, self.leftMotorSpeed * self.constValues[c.dutyCycleMultiplier])
+                self.pi.set_PWM_dutycycle(self.ENA, self.rightMotorSpeed * self.constValues[c.dutyCycleMultiplier])
             else:
-                self.pwmLeftMotor.ChangeDutyCycle(self.leftMotorSpeed * 50)
-                self.pwmRightMotor.ChangeDutyCycle(self.rightMotorSpeed * 50)
+                self.pwmLeftMotor.ChangeDutyCycle(self.leftMotorSpeed * self.constValues[c.dutyCycleMultiplier])
+                self.pwmRightMotor.ChangeDutyCycle(self.rightMotorSpeed * self.constValues[c.dutyCycleMultiplier])
 
     def rotateCamera_handler(self):
         while(self.threadActive):
@@ -213,8 +187,8 @@ class Robot_Controller(object):
 
     def iR_handler(self):
         while(self.threadActive):
-            l = bool(self.pi.read(self.leftIR))
-            r = bool(self.pi.read(self.rightIR))
+            l = bool(self.pi.read(self.IRPins[c.leftIR]))
+            r = bool(self.pi.read(self.IRPins[c.rightIR]))
             self.camera.set_warning_overlay(l, r)
             time.sleep(0.1)
             
