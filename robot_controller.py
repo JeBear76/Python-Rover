@@ -23,12 +23,15 @@ class Robot_Controller(object):
         self.PWMFrequencies = {}
         self.IRPins = {}
         self.constValues = {}
+        self.config = {}
         with shelve.open(c.config) as config:
-            self.motorPins = config[c.motorPins]
-            self.cameraPins = config[c.cameraPins]
-            self.PWMFrequencies = config[c.PWMFrequencies]
-            self.IRPins = config[c.IRPins]
-            self.constValues = config[c.constValues]
+            self.config = dict(config)
+            
+        self.motorPins = self.config[c.motorPins]
+        self.cameraPins = self.config[c.cameraPins]
+        self.PWMFrequencies = self.config[c.PWMFrequencies]
+        self.IRPins = self.config[c.IRPins]
+        self.constValues = self.config[c.constValues]
             
         try:
             self.pi = pigpio.pi()
@@ -54,7 +57,7 @@ class Robot_Controller(object):
         self.constValues = self.constValues[c.GPIO]
         GPIO.setmode(GPIO.BCM)
         
-        for motorPin in self.motorPins:
+        for motorPin in self.motorPins.values():
             GPIO.setup(motorPin, GPIO.OUT)
         
         
@@ -63,7 +66,7 @@ class Robot_Controller(object):
         self.pwmLeftMotor = GPIO.PWM(self.motorPins[c.ENB], self.PWMFrequencies[c.motorFrequency])
         self.pwmLeftMotor.start(0)
         
-        for cameraPin in self.cameraPins:
+        for cameraPin in self.cameraPins.values():
             GPIO.setup(cameraPin, GPIO.OUT)
             
         self.pwmRotation = GPIO.PWM(self.cameraPins[c.servoH], self.PWMFrequencies[c.servoFrequency])
@@ -74,10 +77,10 @@ class Robot_Controller(object):
         pigpio init method
         """
         self.constValues = self.constValues[c.pigpio]
-        for motorPin in self.motorPins:
+        for motorPin in self.motorPins.values():
             self.pi.set_mode(motorPin, pigpio.OUTPUT)
         
-        for cameraPin in self.cameraPins:
+        for cameraPin in self.cameraPins.values():
             self.pi.set_mode(cameraPin, pigpio.OUTPUT)
         
 
