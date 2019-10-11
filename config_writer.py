@@ -12,8 +12,9 @@ def recursiveConfig(configSection, depth=0):
             except:
                 pass
         else:
-            print('=' * depth, end='')
-            print(' ' + item)
+            if depth > 0:
+                print('=' * depth, end=' ')
+            print(item)
             recursiveConfig(value, depth + 1)
 
 with shelve.open(c.config) as config:
