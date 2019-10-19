@@ -6,7 +6,6 @@ Created on Tue Aug 27 18:49:36 2019
 """
 from flask import Flask, Response, render_template, request, send_from_directory
 from gevent.pywsgi import WSGIServer
-from geventwebsocket.handler import WebSocketHandler
 import socketio
 import json
 import os
@@ -41,16 +40,13 @@ video_port = 3001
 videoapp = Flask('videoApp')
 mainapp = Flask(__name__)
 
-sio = socketio.Server(async_mode='gevent', cors_allowed_origins = '*');
+sio = socketio.Server(async_mode='threading', cors_allowed_origins = '*');
 mainapp.wsgi_app = socketio.WSGIApp(sio, mainapp.wsgi_app)
 
-def run_Flask_App(app, port, websocket=False):
-    app.debug = True     
-    if websocket:
-        WSGIServer(('', port), app,
-                          handler_class=WebSocketHandler).serve_forever()
-    else:
-        WSGIServer(('', port), app).serve_forever()
+def run_Flask_App(app, port):
+    app.debug = True 
+    http_server = WSGIServer(('', port), app)
+    http_server.serve_forever()
 
 @videoapp.route('/video_feed')
 def video_feed():
@@ -125,7 +121,7 @@ if __name__ == '__main__':
     robot.StartThisThing()
     videoappThread = threading.Thread(target=startVideoThread)
     videoappThread.start()
-    run_Flask_App(app=mainapp, port=server_port, websocket=True)
+    run_Flask_App(app=mainapp, port=server_port)
     
     
     
