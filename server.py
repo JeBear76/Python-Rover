@@ -5,6 +5,8 @@ Created on Tue Aug 27 18:49:36 2019
 @author: jerep_000
 """
 from flask import Flask, Response, render_template, request, send_from_directory
+from gevent.pywsgi import WSGIServer
+
 import socketio
 import json
 
@@ -36,13 +38,13 @@ def gen(camera):
 
 prev_sid = None
 server_port = 3000
-video_port = 3001   
-videoapp = Flask('videoApp')
+video_port = 3001
 
-app = Flask(__name__)
+videoapp = Flask('videoApp')
+mainapp = Flask(__name__)
 
 sio = socketio.Server(async_mode='threading', cors_allowed_origins = '*');
-app.wsgi_app = socketio.WSGIApp(sio, app.wsgi_app)
+mainapp.wsgi_app = socketio.WSGIApp(sio, mainapp.wsgi_app)
 
 @videoapp.route('/video_feed')
 def video_feed():
@@ -78,8 +80,8 @@ def web_control():
 def favicon():
     return send_from_directory(os.path.join(videoapp.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
-def startVideoThread():
-    videoapp.run(host='0.0.0.0', port=video_port)
+def startMainThread():
+    mainapp.run(host='0.0.0.0', port=server_port, threaded = True)
 
 @sio.event
 def connect(sid, environ):
@@ -108,8 +110,6 @@ def handle_controller_event(sid, controller_command):
     robot.sendCommand(command, value, False) 
     sio.send(sid, 'message', 'command: ' +  command + ' received ' + str(value))
     
-
-    
 if __name__ == '__main__':
     global appCamera
     global robot
@@ -118,11 +118,10 @@ if __name__ == '__main__':
     appCamera = vs.VideoStream()
     robot = rbc.Robot_Controller(appCamera)
     robot.StartThisThing()
-    
-    videoappThread = threading.Thread(target=startVideoThread)
-    videoappThread.start()
-    app.run(host='0.0.0.0', port=server_port, threaded = True)
-    
-    
-    
-    
+
+    mainappThread = threading.Thread(target=startMainThread)
+    mainappThread.start()
+    videoapp.run(host='0.0.0.0', port=video_port)
+    videoapp.debug = True
+    WSGIServer(('', video_port), videoapp).serve_forever()
+
