@@ -106,3 +106,4 @@ ENV/
 *.bak
 *.dat
 *.dir
+*.db
