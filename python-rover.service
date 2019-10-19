@@ -1,0 +1,11 @@
+[Unit]
+Description=uWSGI instance to serve python-rover
+After=network.target
+
+[Service]
+User=pi
+WorkingDirectory=/home/pi/Python-Rover
+ExecStart=/usr/local/bin/uwsgi --socket 0.0.0.0:3001 --protocol=http -w python-rover:videoapp
+
+[Install]
+WantedBy=multi-user.target

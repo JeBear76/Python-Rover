@@ -1,4 +1,4 @@
-from server import videoapp as app
+from server import videoapp
 
 if  __name__ == "__main__":
-    app.run()
+    videoapp.run()
