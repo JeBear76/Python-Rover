@@ -5,12 +5,11 @@ Created on Tue Aug 27 18:49:36 2019
 @author: jerep_000
 """
 from flask import Flask, Response, render_template, request, send_from_directory
+from gevent.pywsgi import WSGIServer
 import socketio
 import json
-
 import os
 import socket
-
 import videostream as vs
 import threading
 
@@ -36,13 +35,18 @@ def gen(camera):
 
 prev_sid = None
 server_port = 3000
-video_port = 3001   
+video_port = 3001  
+ 
 videoapp = Flask('videoApp')
-
-app = Flask(__name__)
+mainapp = Flask(__name__)
 
 sio = socketio.Server(async_mode='threading', cors_allowed_origins = '*');
-app.wsgi_app = socketio.WSGIApp(sio, app.wsgi_app)
+mainapp.wsgi_app = socketio.WSGIApp(sio, mainapp.wsgi_app)
+
+def run_Flask_App(app, port):
+    app.debug = True 
+    http_server = WSGIServer(('', port), app)
+    http_server.serve_forever()
 
 @videoapp.route('/video_feed')
 def video_feed():
@@ -79,7 +83,7 @@ def favicon():
     return send_from_directory(os.path.join(videoapp.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 def startVideoThread():
-    videoapp.run(host='0.0.0.0', port=video_port)
+    run_Flask_App(app=videoapp, port=video_port)
 
 @sio.event
 def connect(sid, environ):
@@ -105,11 +109,8 @@ def handle_controller_event(sid, controller_command):
     print('\x1b[1;36;40m' + controller_command + '\x1b[0m')
     command = webcommand['command']
     value = webcommand['value']
-    robot.sendCommand(command, value, False) 
-    sio.send(sid, 'message', 'command: ' +  command + ' received ' + str(value))
-    
+    robot.sendCommand(command, value, False)
 
-    
 if __name__ == '__main__':
     global appCamera
     global robot
@@ -118,10 +119,9 @@ if __name__ == '__main__':
     appCamera = vs.VideoStream()
     robot = rbc.Robot_Controller(appCamera)
     robot.StartThisThing()
-    
     videoappThread = threading.Thread(target=startVideoThread)
     videoappThread.start()
-    app.run(host='0.0.0.0', port=server_port, threaded = True)
+    run_Flask_App(app=mainapp, port=server_port)
     
     
     
