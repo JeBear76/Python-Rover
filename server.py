@@ -124,6 +124,6 @@ mainappThread.start()
 
 if __name__ == '__main__':    
     videoapp.run(host='0.0.0.0', port=video_port)
-    videoapp.debug = True
-    WSGIServer(('', video_port), videoapp).serve_forever()
+#    videoapp.debug = True
+#    WSGIServer(('', video_port), videoapp).serve_forever()
 
