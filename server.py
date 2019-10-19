@@ -109,18 +109,20 @@ def handle_controller_event(sid, controller_command):
     value = webcommand['value']
     robot.sendCommand(command, value, False) 
     sio.send(sid, 'message', 'command: ' +  command + ' received ' + str(value))
-    
-if __name__ == '__main__':
-    global appCamera
-    global robot
-    global videoappThread
-    print('\x1b[1;31;40m' + get_ip() + '\x1b[0m')
-    appCamera = vs.VideoStream()
-    robot = rbc.Robot_Controller(appCamera)
-    robot.StartThisThing()
 
-    mainappThread = threading.Thread(target=startMainThread)
-    mainappThread.start()
+
+#    global appCamera
+#    global robot
+#    global mainappThread
+print('\x1b[1;31;40m' + get_ip() + '\x1b[0m')
+appCamera = vs.VideoStream()
+robot = rbc.Robot_Controller(appCamera)
+robot.StartThisThing()
+
+mainappThread = threading.Thread(target=startMainThread)
+mainappThread.start()
+
+if __name__ == '__main__':    
     videoapp.run(host='0.0.0.0', port=video_port)
     videoapp.debug = True
     WSGIServer(('', video_port), videoapp).serve_forever()
