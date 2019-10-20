@@ -33,7 +33,8 @@ Setup the piopiod service
 ```
 sudo nano /etc/systemd/system/pigpiod.service
 ```
-paste this in the new file
+
+Paste this in the new file
 ```
 [Unit]
 Description=Pigpio daemon
@@ -83,16 +84,52 @@ Create the Configuration File
 cd ./Python-Rover
 python3 ./config_writer.py
 ```
+
 If you are using the AlphaBot, you can just press enter until done.
 If not, you will have to populate at least the pin numbers.
 
-Finally
+Test it with
 ```
 python3 server.py
 ```
-When the server starts, it will show you the IP address of your Raspberry (if you don't already know it)
+
+When the server starts, it will show you the IP address of your Raspberry (if you don't already know it).
+
 From a computer on your wifi network, go to 
 http://[IP of the Pi]:3001/webcontrol
 
 If all went well, you should see a FPV of the robot, 2 controller buttons and 2 action buttons.
+
+To start the server on boot,
+```
+sudo pip3 install uwsgi
+```
+
+Setup the python-rover service
+```
+sudo nano /etc/systemd/system/python-rover.service
+```
+
+Paste this in the new file
+```
+[Unit]
+Description=uWSGI instance to serve python-rover
+After=network.target
+
+[Service]
+User=pi
+WorkingDirectory=/home/pi/Python-Rover
+ExecStart=/usr/local/bin/uwsgi --socket 0.0.0.0:3001 --protocol=http -w python-rover:videoapp
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Save and exit then 
+```
+sudo systemctl enable python-rover.service
+sudo systemctl start python-rover.service
+systemctl status python-rover.service
+```
+
 Happy roaming!

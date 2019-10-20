@@ -2,7 +2,7 @@
 """
 Created on Fri Oct 11 13:47:03 2019
 
-@author: jerep_000
+@author: JeBear76
 """
 config = 'Configuration'
 motorPins = 'Motor Pins'

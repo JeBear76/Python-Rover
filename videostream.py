@@ -2,7 +2,7 @@
 """
 Created on Tue Aug 27 12:13:50 2019
 
-@author: W7040625
+@author: JeBear76
 """
 import cv2
 import datetime
@@ -50,5 +50,3 @@ class VideoStream(object):
     def set_warning_overlay(self, leftIR, rightIR):
         self.leftOverlay = not leftIR
         self.rightOverlay = not rightIR
-        
-        

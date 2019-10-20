@@ -2,10 +2,9 @@
 """
 Created on Tue Aug 27 18:49:36 2019
 
-@author: jerep_000
+@author: JeBear76
 """
 from flask import Flask, Response, render_template, request, send_from_directory
-from gevent.pywsgi import WSGIServer
 
 import socketio
 import json
@@ -110,10 +109,6 @@ def handle_controller_event(sid, controller_command):
     robot.sendCommand(command, value, False) 
     sio.send(sid, 'message', 'command: ' +  command + ' received ' + str(value))
 
-
-#    global appCamera
-#    global robot
-#    global mainappThread
 print('\x1b[1;31;40m' + get_ip() + '\x1b[0m')
 appCamera = vs.VideoStream()
 robot = rbc.Robot_Controller(appCamera)
@@ -124,6 +119,4 @@ mainappThread.start()
 
 if __name__ == '__main__':    
     videoapp.run(host='0.0.0.0', port=video_port)
-#    videoapp.debug = True
-#    WSGIServer(('', video_port), videoapp).serve_forever()
 
